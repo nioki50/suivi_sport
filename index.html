@@ -29,6 +29,7 @@
             --gradient-force: linear-gradient(135deg, #ff416c, #ff4b2b);
             --gradient-volume: linear-gradient(135deg, #11998e, #38ef7d);
             --gradient-fullbody: linear-gradient(135deg, #fc4a1a, #f7b733);
+            --gradient-crossfit: linear-gradient(135deg, #00b4db, #0083b0);
             --shadow-glow: 0 0 20px rgba(233, 69, 96, 0.3);
             --radius: 12px;
             --radius-lg: 20px;
@@ -256,6 +257,9 @@
         .program-card.volume { background: var(--gradient-volume); }
         .program-card.mixte { background: var(--gradient-purple); }
         .program-card.fullbody { background: var(--gradient-fullbody); }
+        .program-card.crossfit { background: var(--gradient-crossfit); }
+
+        .cycle-card.crossfit { background: var(--gradient-crossfit); }
 
         .program-icon { font-size: 40px; margin-bottom: 8px; }
         .program-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
@@ -931,6 +935,129 @@
         .level-badge.debutant { background: var(--gradient-ocean); }
         .level-badge.intermediaire { background: var(--gradient-purple); }
         .level-badge.avance { background: var(--gradient-fire); }
+
+        /* CrossFit styles */
+        .wod-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .wod-card {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .wod-card:hover { border-color: var(--accent-tertiary); }
+        .wod-card.active {
+            border-color: var(--accent-tertiary);
+            background: rgba(78, 205, 196, 0.2);
+        }
+
+        .wod-name { font-weight: 600; font-size: 14px; }
+        .wod-type { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        .crossfit-type-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .crossfit-type-card {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+            padding: 16px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .crossfit-type-card:hover { border-color: var(--accent-tertiary); }
+        .crossfit-type-card.active {
+            border-color: var(--accent-tertiary);
+            background: rgba(78, 205, 196, 0.2);
+        }
+
+        .crossfit-type-icon { font-size: 28px; margin-bottom: 6px; }
+        .crossfit-type-name { font-size: 13px; font-weight: 600; }
+
+        .wod-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .wod-tab {
+            flex: 1;
+            padding: 10px;
+            background: var(--bg-tertiary);
+            border: none;
+            border-radius: var(--radius);
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .wod-tab.active {
+            background: var(--gradient-crossfit);
+            color: white;
+        }
+
+        .random-wod-btn {
+            background: var(--gradient-crossfit);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 16px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .random-wod-btn:hover { opacity: 0.9; }
+
+        .wod-preview {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .wod-preview-title {
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--accent-tertiary);
+        }
+
+        .wod-preview-type {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .wod-preview-exercises {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
@@ -1002,12 +1129,15 @@
                 Commencer la séance
             </button>
 
-            <div style="margin-top: 16px;">
-                <button class="btn btn-secondary" onclick="showCardioForm()">
+            <div style="margin-top: 16px; display: flex; gap: 12px;">
+                <button class="btn btn-secondary" style="flex: 1;" onclick="showCardioForm()">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
                     </svg>
-                    Ajouter une sortie cardio
+                    Cardio
+                </button>
+                <button class="btn btn-secondary" style="flex: 1; background: var(--gradient-crossfit);" onclick="showCrossfitForm()">
+                    🏋️ CrossFit
                 </button>
             </div>
 
@@ -1116,6 +1246,10 @@
                 <div class="stat-card">
                     <div class="stat-value" id="statCardioCount">0</div>
                     <div class="stat-label">Sorties cardio</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statCrossfitCount">0</div>
+                    <div class="stat-label">Séances CrossFit</div>
                 </div>
             </div>
 
@@ -1301,6 +1435,11 @@
                     <div class="program-name">Full Body</div>
                     <div class="program-desc">3 séances complètes</div>
                 </div>
+                <div class="program-card crossfit" data-program="crossfit" onclick="selectProgram('crossfit')">
+                    <div class="program-icon">🏋️</div>
+                    <div class="program-name">CrossFit</div>
+                    <div class="program-desc">WOD, Haltéro & Gym</div>
+                </div>
             </div>
 
             <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 14px;">Durée du cycle :</p>
@@ -1404,6 +1543,79 @@
             </div>
 
             <button class="btn btn-success" onclick="saveCardioSession()">Enregistrer</button>
+        </div>
+    </div>
+
+    <!-- CrossFit Modal -->
+    <div class="modal" id="crossfitModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">🏋️ Séance CrossFit</span>
+                <button class="modal-close" onclick="closeCrossfitModal()">&times;</button>
+            </div>
+
+            <div class="crossfit-type-grid">
+                <div class="crossfit-type-card active" data-cftype="wod" onclick="selectCrossfitType('wod')">
+                    <div class="crossfit-type-icon">🔥</div>
+                    <div class="crossfit-type-name">WOD</div>
+                </div>
+                <div class="crossfit-type-card" data-cftype="haltero" onclick="selectCrossfitType('haltero')">
+                    <div class="crossfit-type-icon">🏋️‍♂️</div>
+                    <div class="crossfit-type-name">Haltéro</div>
+                </div>
+                <div class="crossfit-type-card" data-cftype="gym" onclick="selectCrossfitType('gym')">
+                    <div class="crossfit-type-icon">🤸</div>
+                    <div class="crossfit-type-name">Gym</div>
+                </div>
+            </div>
+
+            <!-- WOD Section -->
+            <div id="wodSection">
+                <div class="wod-tabs">
+                    <button class="wod-tab active" onclick="switchWodTab('random')">🎲 Aléatoire</button>
+                    <button class="wod-tab" onclick="switchWodTab('select')">📋 Choisir</button>
+                </div>
+
+                <div id="wodRandomTab">
+                    <button class="random-wod-btn" onclick="generateRandomWod()">
+                        🎲 Générer un WOD aléatoire
+                    </button>
+                </div>
+
+                <div id="wodSelectTab" style="display: none;">
+                    <div class="wod-grid" id="wodGrid"></div>
+                </div>
+
+                <div id="wodPreview" class="wod-preview" style="display: none;">
+                    <div class="wod-preview-title" id="wodPreviewName">-</div>
+                    <div class="wod-preview-type" id="wodPreviewType">-</div>
+                    <div class="wod-preview-exercises" id="wodPreviewExercises">-</div>
+                </div>
+            </div>
+
+            <!-- Haltero/Gym Section -->
+            <div id="halteroGymSection" style="display: none;">
+                <p style="color: var(--text-secondary); text-align: center; margin-bottom: 16px;">
+                    Séance technique prédéfinie
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Durée (minutes)</label>
+                <input type="number" class="form-input" id="crossfitDuration" placeholder="30">
+            </div>
+
+            <div class="form-group" id="crossfitRoundsGroup">
+                <label class="form-label">Rounds complétés</label>
+                <input type="number" class="form-input" id="crossfitRounds" placeholder="5">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <input type="text" class="form-input" id="crossfitNotes" placeholder="RX, scaled, temps...">
+            </div>
+
+            <button class="btn btn-success" onclick="saveCrossfitSession()">Enregistrer</button>
         </div>
     </div>
 
@@ -1691,7 +1903,59 @@
                         ]
                     }
                 }
+            },
+            crossfit: {
+                id: 'crossfit',
+                name: 'CrossFit',
+                icon: '🏋️',
+                description: 'WOD, Haltéro & Gym',
+                gradient: 'crossfit',
+                restTime: 60,
+                workouts: {
+                    wod: {
+                        id: 'wod', name: 'WOD du jour',
+                        exercises: [
+                            { id: 'wod1', name: 'WOD', sets: 1, reps: 'AMRAP/For Time', defaultWeight: 0 }
+                        ]
+                    },
+                    haltero: {
+                        id: 'haltero', name: 'Haltérophilie',
+                        exercises: [
+                            { id: 'snatch', name: 'Snatch', sets: 5, reps: '3', defaultWeight: 40 },
+                            { id: 'clean', name: 'Clean & Jerk', sets: 5, reps: '2', defaultWeight: 50 },
+                            { id: 'frontSquat', name: 'Front Squat', sets: 4, reps: '5', defaultWeight: 60 },
+                            { id: 'ohSquat', name: 'Overhead Squat', sets: 3, reps: '5', defaultWeight: 30 }
+                        ]
+                    },
+                    gym: {
+                        id: 'gym', name: 'Gymnastique',
+                        exercises: [
+                            { id: 'muscleUp', name: 'Muscle-ups', sets: 5, reps: '3-5', defaultWeight: 0 },
+                            { id: 'hspu', name: 'HSPU', sets: 4, reps: '5-8', defaultWeight: 0 },
+                            { id: 't2b', name: 'Toes-to-bar', sets: 4, reps: '10-15', defaultWeight: 0 },
+                            { id: 'pistol', name: 'Pistol Squats', sets: 3, reps: '8/jambe', defaultWeight: 0 }
+                        ]
+                    }
+                }
             }
+        };
+
+        const CROSSFIT_WODS = {
+            fran: { name: 'Fran', type: 'fortime', reps: '21-15-9', exercises: ['Thrusters (43/30kg)', 'Pull-ups'], description: '21-15-9 Thrusters + Pull-ups' },
+            murph: { name: 'Murph', type: 'fortime', exercises: ['Run 1.6km', '100 Pull-ups', '200 Push-ups', '300 Squats', 'Run 1.6km'], description: 'Le WOD Hero par excellence' },
+            cindy: { name: 'Cindy', type: 'amrap', duration: 20, exercises: ['5 Pull-ups', '10 Push-ups', '15 Squats'], description: 'AMRAP 20 min' },
+            helen: { name: 'Helen', type: 'fortime', rounds: 3, exercises: ['Run 400m', '21 KB Swings (24/16kg)', '12 Pull-ups'], description: '3 rounds For Time' },
+            grace: { name: 'Grace', type: 'fortime', exercises: ['30 Clean & Jerk (60/43kg)'], description: '30 Clean & Jerk For Time' },
+            isabel: { name: 'Isabel', type: 'fortime', exercises: ['30 Snatch (60/43kg)'], description: '30 Snatch For Time' },
+            diane: { name: 'Diane', type: 'fortime', reps: '21-15-9', exercises: ['Deadlift (100/70kg)', 'HSPU'], description: '21-15-9 DL + HSPU' },
+            annie: { name: 'Annie', type: 'fortime', reps: '50-40-30-20-10', exercises: ['Double-unders', 'Sit-ups'], description: '50-40-30-20-10' },
+            jackie: { name: 'Jackie', type: 'fortime', exercises: ['1km Row', '50 Thrusters (20/15kg)', '30 Pull-ups'], description: 'Row + Thrusters + Pull-ups' },
+            karen: { name: 'Karen', type: 'fortime', exercises: ['150 Wall Balls (9/6kg)'], description: '150 Wall Balls For Time' },
+            nancy: { name: 'Nancy', type: 'fortime', rounds: 5, exercises: ['Run 400m', '15 Overhead Squat (43/30kg)'], description: '5 rounds' },
+            chelsea: { name: 'Chelsea', type: 'emom', duration: 30, exercises: ['5 Pull-ups', '10 Push-ups', '15 Squats'], description: 'EMOM 30 min' },
+            amanda: { name: 'Amanda', type: 'fortime', reps: '9-7-5', exercises: ['Muscle-ups', 'Snatch (60/43kg)'], description: '9-7-5 MU + Snatch' },
+            elizabeth: { name: 'Elizabeth', type: 'fortime', reps: '21-15-9', exercises: ['Clean (60/43kg)', 'Ring Dips'], description: '21-15-9' },
+            filthy50: { name: 'Filthy 50', type: 'fortime', exercises: ['50 Box Jumps', '50 Jumping Pull-ups', '50 KB Swings', '50 Walking Lunges', '50 K2E', '50 Push Press', '50 Back Extensions', '50 Wall Balls', '50 Burpees', '50 Double-unders'], description: '50 reps de 10 exercices' }
         };
 
         const BODYWEIGHT_EXERCISES = {
@@ -1751,6 +2015,7 @@
             selectedDuration: 8,
             sessions: [],
             cardioSessions: [],
+            crossfitSessions: [],
             exerciseHistory: {}
         };
 
@@ -1790,6 +2055,7 @@
                 currentCycle: appState.currentCycle,
                 sessions: appState.sessions,
                 cardioSessions: appState.cardioSessions,
+                crossfitSessions: appState.crossfitSessions,
                 exerciseHistory: appState.exerciseHistory,
                 weightLossGoal: appState.weightLossGoal,
                 weightHistory: appState.weightHistory
@@ -1805,6 +2071,7 @@
                 appState.currentCycle = data.currentCycle || null;
                 appState.sessions = data.sessions || [];
                 appState.cardioSessions = data.cardioSessions || [];
+                appState.crossfitSessions = data.crossfitSessions || [];
                 appState.exerciseHistory = data.exerciseHistory || {};
                 appState.weightLossGoal = data.weightLossGoal || null;
                 appState.weightHistory = data.weightHistory || [];
@@ -1825,6 +2092,7 @@
                 currentCycle: appState.currentCycle,
                 sessions: appState.sessions,
                 cardioSessions: appState.cardioSessions,
+                crossfitSessions: appState.crossfitSessions,
                 exerciseHistory: appState.exerciseHistory,
                 weightLossGoal: appState.weightLossGoal,
                 weightHistory: appState.weightHistory,
@@ -1852,6 +2120,7 @@
                     appState.currentCycle = data.currentCycle || null;
                     appState.sessions = data.sessions || [];
                     appState.cardioSessions = data.cardioSessions || [];
+                    appState.crossfitSessions = data.crossfitSessions || [];
                     appState.exerciseHistory = data.exerciseHistory || {};
                     appState.weightLossGoal = data.weightLossGoal || null;
                     appState.weightHistory = data.weightHistory || [];
@@ -1871,6 +2140,7 @@
                 localStorage.removeItem('fittracker_data');
                 appState.sessions = [];
                 appState.cardioSessions = [];
+                appState.crossfitSessions = [];
                 appState.exerciseHistory = {};
                 appState.currentCycle = null;
                 appState.weightLossGoal = null;
@@ -2546,10 +2816,156 @@
             playSuccessSound();
         }
 
+        // ==================== CROSSFIT ====================
+        let selectedCrossfitType = 'wod';
+        let selectedWod = null;
+        let wodTabMode = 'random';
+
+        function showCrossfitForm() {
+            document.getElementById('crossfitModal').classList.add('show');
+            selectedCrossfitType = 'wod';
+            selectedWod = null;
+            wodTabMode = 'random';
+            updateCrossfitUI();
+            renderWodGrid();
+        }
+
+        function closeCrossfitModal() {
+            document.getElementById('crossfitModal').classList.remove('show');
+            selectedWod = null;
+            document.getElementById('wodPreview').style.display = 'none';
+        }
+
+        function selectCrossfitType(type) {
+            selectedCrossfitType = type;
+            document.querySelectorAll('.crossfit-type-card').forEach(c => c.classList.remove('active'));
+            document.querySelector(`[data-cftype="${type}"]`).classList.add('active');
+            updateCrossfitUI();
+        }
+
+        function updateCrossfitUI() {
+            const wodSection = document.getElementById('wodSection');
+            const halteroGymSection = document.getElementById('halteroGymSection');
+            const roundsGroup = document.getElementById('crossfitRoundsGroup');
+
+            if (selectedCrossfitType === 'wod') {
+                wodSection.style.display = 'block';
+                halteroGymSection.style.display = 'none';
+                roundsGroup.style.display = 'block';
+            } else {
+                wodSection.style.display = 'none';
+                halteroGymSection.style.display = 'block';
+                roundsGroup.style.display = 'none';
+            }
+        }
+
+        function switchWodTab(tab) {
+            wodTabMode = tab;
+            document.querySelectorAll('.wod-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (tab === 'random') {
+                document.getElementById('wodRandomTab').style.display = 'block';
+                document.getElementById('wodSelectTab').style.display = 'none';
+            } else {
+                document.getElementById('wodRandomTab').style.display = 'none';
+                document.getElementById('wodSelectTab').style.display = 'block';
+            }
+        }
+
+        function renderWodGrid() {
+            const container = document.getElementById('wodGrid');
+            let html = '';
+
+            Object.entries(CROSSFIT_WODS).forEach(([id, wod]) => {
+                const typeLabel = wod.type === 'amrap' ? 'AMRAP' : wod.type === 'emom' ? 'EMOM' : 'For Time';
+                html += `
+                    <div class="wod-card ${selectedWod === id ? 'active' : ''}" onclick="selectWod('${id}')">
+                        <div class="wod-name">${wod.name}</div>
+                        <div class="wod-type">${typeLabel}</div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function selectWod(wodId) {
+            selectedWod = wodId;
+            renderWodGrid();
+            showWodPreview(CROSSFIT_WODS[wodId]);
+        }
+
+        function generateRandomWod() {
+            const wodIds = Object.keys(CROSSFIT_WODS);
+            const randomId = wodIds[Math.floor(Math.random() * wodIds.length)];
+            selectedWod = randomId;
+            showWodPreview(CROSSFIT_WODS[randomId]);
+            playBeep(600, 100);
+        }
+
+        function showWodPreview(wod) {
+            document.getElementById('wodPreview').style.display = 'block';
+            document.getElementById('wodPreviewName').textContent = wod.name;
+
+            let typeStr = wod.type === 'amrap' ? `AMRAP ${wod.duration || ''} min` :
+                          wod.type === 'emom' ? `EMOM ${wod.duration || ''} min` :
+                          wod.type === 'fortime' ? 'For Time' : wod.type;
+            if (wod.reps) typeStr += ` (${wod.reps})`;
+            if (wod.rounds) typeStr += ` - ${wod.rounds} rounds`;
+
+            document.getElementById('wodPreviewType').textContent = typeStr;
+            document.getElementById('wodPreviewExercises').innerHTML = wod.exercises.map(e => `• ${e}`).join('<br>');
+        }
+
+        function saveCrossfitSession() {
+            const duration = parseInt(document.getElementById('crossfitDuration').value) || 0;
+            const rounds = parseInt(document.getElementById('crossfitRounds').value) || 0;
+            const notes = document.getElementById('crossfitNotes').value || '';
+
+            if (duration <= 0) {
+                showToast('Veuillez entrer une durée');
+                return;
+            }
+
+            const crossfitIcons = { wod: '🔥', haltero: '🏋️‍♂️', gym: '🤸' };
+            const crossfitNames = { wod: 'WOD', haltero: 'Haltérophilie', gym: 'Gymnastique' };
+
+            const session = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                type: 'crossfit',
+                crossfitType: selectedCrossfitType,
+                wodId: selectedWod,
+                wodName: selectedWod ? CROSSFIT_WODS[selectedWod].name : null,
+                duration: duration * 60,
+                rounds,
+                notes,
+                icon: crossfitIcons[selectedCrossfitType],
+                displayName: selectedWod ? CROSSFIT_WODS[selectedWod].name : crossfitNames[selectedCrossfitType]
+            };
+
+            appState.crossfitSessions.push(session);
+            appState.sessions.push(session);
+            saveState();
+
+            document.getElementById('crossfitDuration').value = '';
+            document.getElementById('crossfitRounds').value = '';
+            document.getElementById('crossfitNotes').value = '';
+            document.getElementById('wodPreview').style.display = 'none';
+            selectedWod = null;
+
+            closeCrossfitModal();
+            updateUI();
+            showToast('Séance CrossFit enregistrée !');
+            playSuccessSound();
+        }
+
         // ==================== STATS ====================
         function updateStats() {
             const totalMuscu = appState.sessions.filter(s => s.type === 'musculation').length;
             const totalCardio = appState.cardioSessions.length;
+            const totalCrossfit = appState.crossfitSessions.length;
             const totalVolume = appState.sessions.filter(s => s.type === 'musculation').reduce((a, b) => a + (b.totalVolume || 0), 0);
             const totalTime = appState.sessions.reduce((a, b) => a + (b.duration || 0), 0);
 
@@ -2557,6 +2973,7 @@
             document.getElementById('statTotalVolume').textContent = (totalVolume / 1000).toFixed(1);
             document.getElementById('statTotalTime').textContent = (totalTime / 3600).toFixed(1);
             document.getElementById('statCardioCount').textContent = totalCardio;
+            document.getElementById('statCrossfitCount').textContent = totalCrossfit;
 
             const select = document.getElementById('exerciseSelect');
             const existingOptions = new Set([...select.options].map(o => o.value));
@@ -2785,6 +3202,21 @@
                             </div>
                         </div>
                     `;
+                } else if (session.type === 'crossfit') {
+                    const minutes = Math.floor(session.duration / 60);
+                    const crossfitIcons = { wod: '🔥', haltero: '🏋️‍♂️', gym: '🤸' };
+                    const icon = crossfitIcons[session.crossfitType] || '🏋️';
+                    html += `
+                        <div class="history-item">
+                            <div class="history-date">${dateStr}</div>
+                            <div class="history-title">${icon} ${session.displayName || 'CrossFit'}</div>
+                            <div class="history-stats">
+                                <div class="history-stat">⏱️ ${minutes} min</div>
+                                ${session.rounds ? `<div class="history-stat">🔄 ${session.rounds} rounds</div>` : ''}
+                                ${session.notes ? `<div class="history-stat">📝 ${session.notes}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
                 } else {
                     const minutes = Math.floor(session.duration / 60);
                     const icon = session.isBodyweight ? '🧳' : '🏋️';
@@ -2928,6 +3360,19 @@
                             <div class="history-title">${cardioIcons[session.cardioType] || '💪'} Cardio</div>
                             <div class="history-stats">
                                 <span class="history-stat">⏱️ ${minutes} min</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (session.type === 'crossfit') {
+                    const crossfitIcons = { wod: '🔥', haltero: '🏋️‍♂️', gym: '🤸' };
+                    const icon = crossfitIcons[session.crossfitType] || '🏋️';
+                    html += `
+                        <div class="history-item" style="margin-bottom: 8px;">
+                            <div class="history-date">${dateStr}</div>
+                            <div class="history-title">${icon} ${session.displayName || 'CrossFit'}</div>
+                            <div class="history-stats">
+                                <span class="history-stat">⏱️ ${minutes} min</span>
+                                ${session.rounds ? `<span class="history-stat">🔄 ${session.rounds} rds</span>` : ''}
                             </div>
                         </div>
                     `;
