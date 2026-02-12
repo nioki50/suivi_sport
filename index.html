@@ -470,6 +470,158 @@
             transform: scale(1.2);
         }
 
+        /* Exercise Details Panel */
+        .exercise-details-panel {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            margin-bottom: 16px;
+            overflow: hidden;
+            border: 1px solid var(--bg-tertiary);
+        }
+
+        .exercise-images {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            justify-content: center;
+        }
+
+        .exercise-images img {
+            width: 48%;
+            max-width: 225px;
+            height: auto;
+            border-radius: var(--radius);
+            object-fit: cover;
+            border: 2px solid var(--bg-primary);
+        }
+
+        .exercise-images .img-label {
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .exercise-img-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .exercise-img-container span {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .details-toggle {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: none;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .details-toggle:hover {
+            background: var(--bg-primary);
+        }
+
+        .details-toggle .arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .details-toggle.open .arrow {
+            transform: rotate(180deg);
+        }
+
+        .details-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .details-content.open {
+            max-height: 600px;
+        }
+
+        .details-section {
+            padding: 12px 16px;
+            border-top: 1px solid var(--bg-tertiary);
+        }
+
+        .details-section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .details-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .details-list li {
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 4px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .details-list li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--accent-tertiary);
+        }
+
+        .details-list.vigilance li::before {
+            content: "⚠️";
+            font-size: 11px;
+        }
+
+        .muscles-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .muscle-tag {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .muscle-tag.primary {
+            background: var(--gradient-fire);
+            color: white;
+        }
+
+        .muscle-tag.secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
         /* Stats */
         .stats-grid {
             display: grid;
@@ -1203,6 +1355,38 @@
             </div>
 
             <div class="series-progress" id="seriesProgress"></div>
+
+            <!-- Exercise Details Panel -->
+            <div class="exercise-details-panel" id="exerciseDetailsPanel" style="display: none;">
+                <div class="exercise-images" id="exerciseImages">
+                    <div class="exercise-img-container">
+                        <img id="exerciseImg1" src="" alt="Position départ">
+                        <span>Départ</span>
+                    </div>
+                    <div class="exercise-img-container">
+                        <img id="exerciseImg2" src="" alt="Position fin">
+                        <span>Fin</span>
+                    </div>
+                </div>
+                <button class="details-toggle" id="detailsToggle" onclick="toggleExerciseDetails()">
+                    <span>Voir les instructions</span>
+                    <span class="arrow">▼</span>
+                </button>
+                <div class="details-content" id="detailsContent">
+                    <div class="details-section">
+                        <div class="details-section-title">📋 Exécution</div>
+                        <ul class="details-list" id="executionList"></ul>
+                    </div>
+                    <div class="details-section">
+                        <div class="details-section-title">⚠️ Points de vigilance</div>
+                        <ul class="details-list vigilance" id="vigilanceList"></ul>
+                    </div>
+                    <div class="details-section">
+                        <div class="details-section-title">💪 Muscles travaillés</div>
+                        <div class="muscles-tags" id="musclesTags"></div>
+                    </div>
+                </div>
+            </div>
 
             <div class="card">
                 <div class="card-header">
@@ -2007,6 +2191,1387 @@
             'default': 'Exercice au poids de corps'
         };
 
+        // ==================== EXERCISE DETAILS (Descriptions FR + Images) ====================
+        const EXERCISE_DETAILS = {
+            // ========== HAUT DU CORPS - PECTORAUX ==========
+            'Développé couché': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Bench_Press_-_Medium_Grip/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Bench_Press_-_Medium_Grip/1.jpg',
+                execution: [
+                    "Allongez-vous sur le banc, pieds fermement au sol",
+                    "Saisissez la barre légèrement plus large que les épaules",
+                    "Descendez la barre de façon contrôlée jusqu'au milieu de la poitrine",
+                    "Poussez en expirant jusqu'à l'extension complète des bras"
+                ],
+                vigilance: [
+                    "Gardez les omoplates serrées et le dos légèrement cambré",
+                    "Ne rebondissez jamais la barre sur la poitrine",
+                    "Coudes à 45° du corps (pas à 90° pour protéger les épaules)",
+                    "Poignets droits et verrouillés, ne les cassez pas en arrière"
+                ],
+                muscles: { principaux: ["Pectoraux"], secondaires: ["Deltoïdes antérieurs", "Triceps"] }
+            },
+            'Développé incliné': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Incline_Bench_Press_-_Medium_Grip/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Incline_Bench_Press_-_Medium_Grip/1.jpg',
+                execution: [
+                    "Réglez le banc à 30-45° d'inclinaison",
+                    "Saisissez la barre largeur d'épaules ou légèrement plus",
+                    "Descendez vers le haut de la poitrine (clavicules)",
+                    "Poussez en ligne droite vers le plafond"
+                ],
+                vigilance: [
+                    "Ne descendez pas trop bas pour éviter le stress sur l'épaule",
+                    "Gardez le bas du dos plaqué contre le banc",
+                    "Évitez d'incliner trop haut (>45°) ce qui sollicite trop les épaules",
+                    "Contractez les abdos pour stabiliser le tronc"
+                ],
+                muscles: { principaux: ["Pectoraux supérieurs"], secondaires: ["Deltoïdes antérieurs", "Triceps"] }
+            },
+            'Développé haltères': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bench_Press/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bench_Press/1.jpg',
+                execution: [
+                    "Allongez-vous avec un haltère dans chaque main",
+                    "Démarrez bras tendus au-dessus de la poitrine",
+                    "Descendez en écartant les coudes à 45°",
+                    "Remontez en rapprochant légèrement les haltères"
+                ],
+                vigilance: [
+                    "Contrôlez la descente, ne laissez pas tomber les haltères",
+                    "Gardez les poignets neutres (pas de rotation excessive)",
+                    "Ne descendez pas plus bas que le niveau du banc",
+                    "À la fin, ramenez les haltères sur les cuisses avant de vous relever"
+                ],
+                muscles: { principaux: ["Pectoraux"], secondaires: ["Deltoïdes antérieurs", "Triceps"] }
+            },
+            'Floor press': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Alternating_Floor_Press/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Alternating_Floor_Press/1.jpg',
+                execution: [
+                    "Allongez-vous au sol, genoux fléchis, pieds à plat",
+                    "Saisissez la barre ou les haltères",
+                    "Descendez jusqu'à ce que les coudes touchent le sol",
+                    "Marquez une pause puis poussez vers le haut"
+                ],
+                vigilance: [
+                    "Le sol limite naturellement l'amplitude - respectez-la",
+                    "Gardez les coudes à 45° du corps",
+                    "Ne rebondissez pas les coudes sur le sol",
+                    "Idéal pour travailler le lockout et protéger les épaules"
+                ],
+                muscles: { principaux: ["Pectoraux", "Triceps"], secondaires: ["Deltoïdes antérieurs"] }
+            },
+            'Écarté poulie / haltères': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Flyes/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Flyes/1.jpg',
+                execution: [
+                    "Allongez-vous sur le banc, haltères au-dessus de la poitrine",
+                    "Bras légèrement fléchis, paumes face à face",
+                    "Ouvrez les bras en arc de cercle jusqu'à sentir l'étirement",
+                    "Remontez en serrant les pectoraux"
+                ],
+                vigilance: [
+                    "Gardez toujours une légère flexion des coudes",
+                    "Ne descendez pas trop bas pour protéger les épaules",
+                    "Mouvement lent et contrôlé, pas d'élan",
+                    "Concentrez-vous sur la contraction des pectoraux"
+                ],
+                muscles: { principaux: ["Pectoraux"], secondaires: ["Deltoïdes antérieurs"] }
+            },
+            'Écarté couché': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Flyes/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Flyes/1.jpg',
+                execution: [
+                    "Allongez-vous sur le banc, haltères au-dessus de la poitrine",
+                    "Bras légèrement fléchis, paumes face à face",
+                    "Ouvrez les bras en arc de cercle jusqu'à sentir l'étirement",
+                    "Remontez en serrant les pectoraux"
+                ],
+                vigilance: [
+                    "Gardez toujours une légère flexion des coudes",
+                    "Ne descendez pas trop bas pour protéger les épaules",
+                    "Mouvement lent et contrôlé, pas d'élan",
+                    "Concentrez-vous sur la contraction des pectoraux"
+                ],
+                muscles: { principaux: ["Pectoraux"], secondaires: ["Deltoïdes antérieurs"] }
+            },
+
+            // ========== HAUT DU CORPS - DOS ==========
+            'Rowing barre': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/1.jpg',
+                execution: [
+                    "Debout, pieds largeur d'épaules, genoux légèrement fléchis",
+                    "Penchez le buste à 45° environ, dos droit",
+                    "Tirez la barre vers le nombril en serrant les omoplates",
+                    "Redescendez de façon contrôlée"
+                ],
+                vigilance: [
+                    "Gardez le dos droit et neutre pendant tout le mouvement",
+                    "Ne tirez pas avec les biceps, concentrez-vous sur les dorsaux",
+                    "Évitez de vous redresser pour tricher",
+                    "Serrez les omoplates en haut du mouvement"
+                ],
+                muscles: { principaux: ["Dorsaux", "Trapèzes"], secondaires: ["Biceps", "Rhomboïdes", "Lombaires"] }
+            },
+            'Rowing Pendlay': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/1.jpg',
+                execution: [
+                    "Buste parallèle au sol, barre au sol",
+                    "Tirez explosif la barre vers le bas de la poitrine",
+                    "Reposez complètement la barre au sol entre chaque rep",
+                    "Gardez le dos parfaitement horizontal"
+                ],
+                vigilance: [
+                    "Buste strictement parallèle au sol",
+                    "Chaque répétition part du sol (dead stop)",
+                    "Mouvement explosif mais contrôlé",
+                    "Évitez tout mouvement de balancier du corps"
+                ],
+                muscles: { principaux: ["Dorsaux", "Trapèzes"], secondaires: ["Biceps", "Rhomboïdes", "Érecteurs"] }
+            },
+            'Rowing haltère': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Two-Dumbbell_Row/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Two-Dumbbell_Row/1.jpg',
+                execution: [
+                    "Un genou et une main sur le banc, dos parallèle au sol",
+                    "Haltère dans l'autre main, bras tendu vers le sol",
+                    "Tirez l'haltère vers la hanche en gardant le coude proche du corps",
+                    "Redescendez lentement en étirant le dorsal"
+                ],
+                vigilance: [
+                    "Gardez le dos droit et parallèle au sol",
+                    "Ne tournez pas le torse pendant le mouvement",
+                    "Tirez vers la hanche, pas vers l'épaule",
+                    "Contrôlez la phase négative (descente)"
+                ],
+                muscles: { principaux: ["Dorsaux"], secondaires: ["Biceps", "Rhomboïdes", "Trapèzes"] }
+            },
+            'Rowing haltère lourd': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Two-Dumbbell_Row/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Two-Dumbbell_Row/1.jpg',
+                execution: [
+                    "Un genou et une main sur le banc, dos parallèle au sol",
+                    "Haltère lourd dans l'autre main, bras tendu",
+                    "Tirez puissamment vers la hanche",
+                    "Redescendez de façon contrôlée"
+                ],
+                vigilance: [
+                    "Gardez le dos droit malgré la charge lourde",
+                    "Un léger mouvement du corps est acceptable pour les charges lourdes",
+                    "Concentrez-vous sur la contraction du dorsal",
+                    "Ne sacrifiez pas la forme pour la charge"
+                ],
+                muscles: { principaux: ["Dorsaux"], secondaires: ["Biceps", "Rhomboïdes", "Trapèzes"] }
+            },
+            'Tractions': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/1.jpg',
+                execution: [
+                    "Suspendez-vous à la barre, prise légèrement plus large que les épaules",
+                    "Tirez-vous vers le haut jusqu'à amener le menton au-dessus de la barre",
+                    "Serrez les omoplates et contractez les dorsaux",
+                    "Redescendez de façon contrôlée jusqu'à l'extension complète"
+                ],
+                vigilance: [
+                    "Évitez de vous balancer ou d'utiliser l'élan",
+                    "Initiez le mouvement par les dorsaux, pas les biceps",
+                    "Descendez complètement pour étirer les dorsaux",
+                    "Gardez les épaules basses et en arrière"
+                ],
+                muscles: { principaux: ["Dorsaux", "Grand rond"], secondaires: ["Biceps", "Trapèzes", "Rhomboïdes"] }
+            },
+            'Tractions lestées': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/1.jpg',
+                execution: [
+                    "Attachez le poids à une ceinture de lest",
+                    "Suspendez-vous, prise pronation largeur d'épaules",
+                    "Tirez-vous en gardant le contrôle malgré la charge",
+                    "Redescendez lentement sans rebond"
+                ],
+                vigilance: [
+                    "Commencez avec un poids léger et progressez graduellement",
+                    "Le lest ne doit pas compromettre la technique",
+                    "Gardez le corps gainé pour éviter le balancement",
+                    "Descendez complètement entre chaque répétition"
+                ],
+                muscles: { principaux: ["Dorsaux", "Grand rond"], secondaires: ["Biceps", "Trapèzes"] }
+            },
+            'Tractions pronation': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/1.jpg',
+                execution: [
+                    "Prise en pronation (paumes vers l'avant), plus large que les épaules",
+                    "Tirez-vous jusqu'à ce que le menton dépasse la barre",
+                    "Serrez fort les omoplates en haut",
+                    "Redescendez complètement bras tendus"
+                ],
+                vigilance: [
+                    "Prise pronation = plus de travail sur la largeur du dos",
+                    "Ne croisez pas les jambes, gardez-les légèrement devant",
+                    "Évitez le kipping (balancement)",
+                    "Amplitude complète à chaque répétition"
+                ],
+                muscles: { principaux: ["Dorsaux"], secondaires: ["Biceps", "Trapèzes", "Avant-bras"] }
+            },
+            'Tractions supination': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Chin-Up/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Chin-Up/1.jpg',
+                execution: [
+                    "Prise en supination (paumes vers vous), largeur d'épaules",
+                    "Tirez-vous jusqu'à ce que le menton dépasse la barre",
+                    "Contractez les biceps et les dorsaux",
+                    "Redescendez de façon contrôlée"
+                ],
+                vigilance: [
+                    "Plus facile que la pronation grâce à l'implication des biceps",
+                    "Gardez les coudes proches du corps",
+                    "Ne vous balancez pas pour tricher",
+                    "Descendez jusqu'à l'extension complète"
+                ],
+                muscles: { principaux: ["Dorsaux", "Biceps"], secondaires: ["Trapèzes", "Avant-bras"] }
+            },
+            'Tirage vertical': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide-Grip_Lat_Pulldown/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide-Grip_Lat_Pulldown/1.jpg',
+                execution: [
+                    "Asseyez-vous, cuisses calées sous les boudins",
+                    "Saisissez la barre large, prise pronation",
+                    "Tirez la barre vers le haut de la poitrine",
+                    "Remontez de façon contrôlée en étirant les dorsaux"
+                ],
+                vigilance: [
+                    "Ne tirez pas derrière la nuque (risque pour les épaules)",
+                    "Gardez le buste légèrement incliné en arrière",
+                    "Serrez les omoplates à chaque répétition",
+                    "Ne vous penchez pas excessivement en arrière"
+                ],
+                muscles: { principaux: ["Dorsaux"], secondaires: ["Biceps", "Trapèzes", "Rhomboïdes"] }
+            },
+            'Face pull': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Face_Pull/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Face_Pull/1.jpg',
+                execution: [
+                    "Face à la poulie haute, corde à hauteur du visage",
+                    "Tirez la corde vers le visage en écartant les mains",
+                    "Serrez les omoplates et tournez les pouces vers l'arrière",
+                    "Revenez lentement à la position de départ"
+                ],
+                vigilance: [
+                    "Gardez les coudes hauts pendant tout le mouvement",
+                    "Ne tirez pas avec les bras, utilisez les épaules arrière",
+                    "Mouvement lent et contrôlé",
+                    "Excellent pour la santé des épaules - à faire régulièrement"
+                ],
+                muscles: { principaux: ["Deltoïdes postérieurs", "Trapèzes"], secondaires: ["Rhomboïdes", "Rotateurs externes"] }
+            },
+            'Shrugs': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shrug/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shrug/1.jpg',
+                execution: [
+                    "Debout, barre ou haltères le long du corps",
+                    "Montez les épaules vers les oreilles",
+                    "Maintenez la contraction 1-2 secondes en haut",
+                    "Redescendez lentement"
+                ],
+                vigilance: [
+                    "Ne roulez pas les épaules (mouvement vertical uniquement)",
+                    "Gardez les bras tendus, ne pliez pas les coudes",
+                    "Ne penchez pas la tête en avant",
+                    "Utilisez une charge permettant une amplitude complète"
+                ],
+                muscles: { principaux: ["Trapèzes supérieurs"], secondaires: ["Rhomboïdes", "Élévateur de la scapula"] }
+            },
+
+            // ========== HAUT DU CORPS - ÉPAULES ==========
+            'Développé militaire': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shoulder_Press/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shoulder_Press/1.jpg',
+                execution: [
+                    "Debout ou assis, barre au niveau des clavicules",
+                    "Poussez la barre au-dessus de la tête jusqu'à l'extension",
+                    "La barre passe devant le visage puis monte verticalement",
+                    "Redescendez de façon contrôlée aux clavicules"
+                ],
+                vigilance: [
+                    "Gardez le tronc gainé, évitez de cambrer le dos",
+                    "Ne verrouillez pas brutalement les coudes en haut",
+                    "Rentrez légèrement le menton pour laisser passer la barre",
+                    "Ne descendez pas plus bas que les clavicules"
+                ],
+                muscles: { principaux: ["Deltoïdes"], secondaires: ["Triceps", "Trapèzes supérieurs"] }
+            },
+            'Développé épaules': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shoulder_Press/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shoulder_Press/1.jpg',
+                execution: [
+                    "Assis ou debout, haltères ou barre au niveau des épaules",
+                    "Poussez vers le haut jusqu'à l'extension des bras",
+                    "Gardez le corps stable et gainé",
+                    "Redescendez de façon contrôlée"
+                ],
+                vigilance: [
+                    "Ne cambrez pas excessivement le dos",
+                    "Gardez les abdos contractés",
+                    "Coudes légèrement devant le corps, pas sur les côtés",
+                    "Contrôlez la descente"
+                ],
+                muscles: { principaux: ["Deltoïdes"], secondaires: ["Triceps", "Trapèzes"] }
+            },
+            'Push press': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Push_Press/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Push_Press/1.jpg',
+                execution: [
+                    "Barre aux clavicules, pieds largeur d'épaules",
+                    "Fléchissez légèrement les genoux (dip)",
+                    "Poussez explosif avec les jambes puis les bras",
+                    "Verrouillez les bras en haut, redescendez contrôlé"
+                ],
+                vigilance: [
+                    "Le dip doit être court et contrôlé (10-15cm)",
+                    "L'élan vient des jambes, pas du dos",
+                    "Gardez le tronc gainé pendant tout le mouvement",
+                    "Ne penchez pas en arrière"
+                ],
+                muscles: { principaux: ["Deltoïdes", "Quadriceps"], secondaires: ["Triceps", "Trapèzes", "Core"] }
+            },
+            'Développé Arnold': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Arnold_Dumbbell_Press/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Arnold_Dumbbell_Press/1.jpg',
+                execution: [
+                    "Assis, haltères devant les épaules, paumes vers vous",
+                    "Poussez en tournant les paumes vers l'avant",
+                    "Terminez bras tendus, paumes vers l'avant",
+                    "Redescendez en inversant la rotation"
+                ],
+                vigilance: [
+                    "La rotation doit être fluide et continue",
+                    "Ne forcez pas la rotation en bas du mouvement",
+                    "Gardez le dos bien droit contre le dossier",
+                    "Mouvement lent et contrôlé"
+                ],
+                muscles: { principaux: ["Deltoïdes (3 faisceaux)"], secondaires: ["Triceps", "Trapèzes"] }
+            },
+            'Élévations latérales': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Side_Lateral_Raise/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Side_Lateral_Raise/1.jpg',
+                execution: [
+                    "Debout, haltères le long du corps",
+                    "Levez les bras sur les côtés jusqu'à l'horizontale",
+                    "Gardez une légère flexion des coudes",
+                    "Redescendez lentement sans toucher les cuisses"
+                ],
+                vigilance: [
+                    "Ne montez pas plus haut que les épaules",
+                    "Évitez de balancer le corps pour tricher",
+                    "Gardez les pouces légèrement vers le bas (versez l'eau)",
+                    "Charge légère avec bonne forme > charge lourde avec élan"
+                ],
+                muscles: { principaux: ["Deltoïdes latéraux"], secondaires: ["Trapèzes supérieurs"] }
+            },
+            'Élévations frontales': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Dumbbell_Raise/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Dumbbell_Raise/1.jpg',
+                execution: [
+                    "Debout, haltères devant les cuisses",
+                    "Levez un bras ou les deux devant vous jusqu'à l'horizontale",
+                    "Gardez le bras légèrement fléchi",
+                    "Redescendez de façon contrôlée"
+                ],
+                vigilance: [
+                    "Ne montez pas plus haut que les épaules",
+                    "Gardez le corps stable, pas de balancement",
+                    "Ne cambrez pas le dos",
+                    "Mouvement lent et contrôlé"
+                ],
+                muscles: { principaux: ["Deltoïdes antérieurs"], secondaires: ["Pectoraux supérieurs", "Trapèzes"] }
+            },
+            'Oiseau': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Dumbbell_Rear_Delt_Raise_With_Head_On_Bench/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Dumbbell_Rear_Delt_Raise_With_Head_On_Bench/1.jpg',
+                execution: [
+                    "Penché à 90°, haltères sous la poitrine",
+                    "Levez les bras sur les côtés en gardant les coudes légèrement fléchis",
+                    "Serrez les omoplates en haut du mouvement",
+                    "Redescendez lentement"
+                ],
+                vigilance: [
+                    "Gardez le dos droit et parallèle au sol",
+                    "Ne levez pas le buste pendant le mouvement",
+                    "Concentrez-vous sur les deltoïdes postérieurs",
+                    "Charge légère pour bien sentir le muscle"
+                ],
+                muscles: { principaux: ["Deltoïdes postérieurs"], secondaires: ["Trapèzes", "Rhomboïdes"] }
+            },
+
+            // ========== HAUT DU CORPS - BRAS ==========
+            'Curl barre': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Curl/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Curl/1.jpg',
+                execution: [
+                    "Debout, barre en prise supination (paumes vers le haut)",
+                    "Coudes fixes le long du corps",
+                    "Fléchissez les bras en montant la barre vers les épaules",
+                    "Redescendez de façon contrôlée jusqu'à l'extension"
+                ],
+                vigilance: [
+                    "Gardez les coudes immobiles le long du corps",
+                    "Ne balancez pas le corps pour soulever la charge",
+                    "Contrôlez la phase négative (descente)",
+                    "Ne cambrez pas le dos"
+                ],
+                muscles: { principaux: ["Biceps"], secondaires: ["Brachial", "Avant-bras"] }
+            },
+            'Curl barre + Dips': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Curl/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Curl/1.jpg',
+                execution: [
+                    "Curl : Debout, barre en supination, montez vers les épaules",
+                    "Gardez les coudes fixes le long du corps",
+                    "Enchaînez directement avec les dips (biset)",
+                    "Pas de repos entre les deux exercices"
+                ],
+                vigilance: [
+                    "Gardez les coudes immobiles pendant le curl",
+                    "Ne trichez pas avec le dos",
+                    "Le biset = fatigue importante, adaptez les charges",
+                    "Concentrez-vous sur la qualité plutôt que la charge"
+                ],
+                muscles: { principaux: ["Biceps", "Triceps"], secondaires: ["Avant-bras", "Pectoraux"] }
+            },
+            'Curl marteau': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Alternate_Hammer_Curl/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Alternate_Hammer_Curl/1.jpg',
+                execution: [
+                    "Debout, haltères le long du corps, prise neutre (pouces vers le haut)",
+                    "Fléchissez un bras en gardant la prise neutre",
+                    "Montez jusqu'à la contraction maximale",
+                    "Alternez ou faites les deux bras ensemble"
+                ],
+                vigilance: [
+                    "Gardez les coudes fixes le long du corps",
+                    "Ne tournez pas les poignets pendant le mouvement",
+                    "Contrôlez la descente",
+                    "La prise neutre sollicite plus le brachial et l'avant-bras"
+                ],
+                muscles: { principaux: ["Biceps", "Brachial"], secondaires: ["Avant-bras (brachio-radial)"] }
+            },
+            'Curl incliné': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Alternate_Incline_Dumbbell_Curl/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Alternate_Incline_Dumbbell_Curl/1.jpg',
+                execution: [
+                    "Assis sur banc incliné à 45-60°, haltères bras tendus",
+                    "Les bras pendent naturellement derrière le corps",
+                    "Fléchissez en gardant les coudes fixes",
+                    "Redescendez complètement pour étirer le biceps"
+                ],
+                vigilance: [
+                    "L'inclinaison étire le biceps - commencez léger",
+                    "Ne balancez pas les bras",
+                    "Gardez les épaules plaquées contre le banc",
+                    "Amplitude complète pour maximiser l'étirement"
+                ],
+                muscles: { principaux: ["Biceps (longue portion)"], secondaires: ["Brachial"] }
+            },
+            'Curl + Triceps': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Curl/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Curl/1.jpg',
+                execution: [
+                    "Curl : Montez la barre/haltères vers les épaules",
+                    "Gardez les coudes fixes",
+                    "Enchaînez avec extension triceps (biset)",
+                    "Pas de repos entre les deux"
+                ],
+                vigilance: [
+                    "Biset bras = congestion importante",
+                    "Adaptez les charges pour le biset",
+                    "Ne sacrifiez pas la forme pour la charge",
+                    "Hydratez-vous bien"
+                ],
+                muscles: { principaux: ["Biceps", "Triceps"], secondaires: ["Avant-bras"] }
+            },
+            'Dips': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dips_-_Triceps_Version/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dips_-_Triceps_Version/1.jpg',
+                execution: [
+                    "Mains sur les barres parallèles, bras tendus",
+                    "Corps droit (pour triceps) ou penché (pour pectoraux)",
+                    "Descendez en fléchissant les coudes jusqu'à 90°",
+                    "Poussez pour revenir en position haute"
+                ],
+                vigilance: [
+                    "Ne descendez pas trop bas pour protéger les épaules",
+                    "Gardez les coudes proches du corps pour les triceps",
+                    "Écartez les coudes pour cibler les pectoraux",
+                    "Évitez de balancer les jambes"
+                ],
+                muscles: { principaux: ["Triceps", "Pectoraux"], secondaires: ["Deltoïdes antérieurs"] }
+            },
+            'Dips lestés': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dips_-_Triceps_Version/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dips_-_Triceps_Version/1.jpg',
+                execution: [
+                    "Attachez le poids à une ceinture de lest",
+                    "Même exécution que les dips classiques",
+                    "Descendez de façon contrôlée",
+                    "Poussez puissamment pour remonter"
+                ],
+                vigilance: [
+                    "Maîtrisez les dips au poids de corps avant de lester",
+                    "Le lest augmente le stress sur les épaules",
+                    "Ne descendez pas trop bas",
+                    "Progressez graduellement en charge"
+                ],
+                muscles: { principaux: ["Triceps", "Pectoraux"], secondaires: ["Deltoïdes antérieurs"] }
+            },
+            'Extension triceps': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_One-Arm_Triceps_Extension/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_One-Arm_Triceps_Extension/1.jpg',
+                execution: [
+                    "Debout ou assis, haltère tenu à deux mains au-dessus de la tête",
+                    "Coudes pointés vers le plafond, fléchissez les avant-bras",
+                    "Descendez l'haltère derrière la tête",
+                    "Remontez en contractant les triceps"
+                ],
+                vigilance: [
+                    "Gardez les coudes fixes et proches de la tête",
+                    "Ne cambrez pas le dos",
+                    "Mouvement contrôlé, pas d'élan",
+                    "Étirez bien en bas, contractez fort en haut"
+                ],
+                muscles: { principaux: ["Triceps (longue portion)"], secondaires: [] }
+            },
+            'Barre au front': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_Triceps_Press/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_Triceps_Press/1.jpg',
+                execution: [
+                    "Allongé sur le banc, barre au-dessus de la poitrine",
+                    "Coudes fixes, descendez la barre vers le front",
+                    "Arrêtez juste avant de toucher le front",
+                    "Remontez en contractant les triceps"
+                ],
+                vigilance: [
+                    "Gardez les coudes parfaitement fixes",
+                    "Ne descendez pas la barre trop vite",
+                    "Commencez léger pour maîtriser le mouvement",
+                    "Variante : descendez derrière la tête pour plus d'étirement"
+                ],
+                muscles: { principaux: ["Triceps"], secondaires: [] }
+            },
+            'Pushdown corde': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Triceps_Pushdown_-_Rope_Attachment/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Triceps_Pushdown_-_Rope_Attachment/1.jpg',
+                execution: [
+                    "Face à la poulie haute, saisissez la corde",
+                    "Coudes collés au corps, poussez vers le bas",
+                    "En bas, écartez les mains pour contracter les triceps",
+                    "Remontez de façon contrôlée jusqu'à 90°"
+                ],
+                vigilance: [
+                    "Gardez les coudes strictement immobiles",
+                    "Ne vous penchez pas en avant pour tricher",
+                    "Écartez bien les mains en bas du mouvement",
+                    "Mouvement lent et contrôlé"
+                ],
+                muscles: { principaux: ["Triceps"], secondaires: [] }
+            },
+            'Kickback triceps': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Triceps_Kickback/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Triceps_Kickback/1.jpg',
+                execution: [
+                    "Penché, un bras en appui, coude à 90° le long du corps",
+                    "Tendez le bras vers l'arrière en gardant le coude fixe",
+                    "Contractez fort le triceps en haut",
+                    "Revenez lentement à 90°"
+                ],
+                vigilance: [
+                    "Gardez le coude strictement immobile",
+                    "Le bras doit être parallèle au sol",
+                    "Charge légère pour bien sentir la contraction",
+                    "Ne balancez pas l'haltère"
+                ],
+                muscles: { principaux: ["Triceps"], secondaires: [] }
+            },
+
+            // ========== BAS DU CORPS - QUADRICEPS ==========
+            'Squat barre': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Full_Squat/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Full_Squat/1.jpg',
+                execution: [
+                    "Barre sur les trapèzes, pieds largeur d'épaules ou plus",
+                    "Pointes de pieds légèrement vers l'extérieur",
+                    "Descendez en poussant les genoux vers l'extérieur",
+                    "Descendez jusqu'à ce que les cuisses soient parallèles au sol minimum"
+                ],
+                vigilance: [
+                    "Gardez le dos droit et la poitrine sortie",
+                    "Les genoux suivent la direction des pieds",
+                    "Poussez à travers les talons pour remonter",
+                    "Ne laissez pas les genoux rentrer vers l'intérieur"
+                ],
+                muscles: { principaux: ["Quadriceps", "Fessiers"], secondaires: ["Ischio-jambiers", "Lombaires", "Adducteurs"] }
+            },
+            'Squat avant': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Barbell_Squat/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Barbell_Squat/1.jpg',
+                execution: [
+                    "Barre sur les deltoïdes antérieurs, coudes hauts",
+                    "Pieds largeur d'épaules, pointes vers l'extérieur",
+                    "Descendez en gardant le buste très droit",
+                    "Remontez en gardant les coudes hauts"
+                ],
+                vigilance: [
+                    "Gardez les coudes très hauts pendant tout le mouvement",
+                    "Le buste reste plus vertical qu'au back squat",
+                    "Sollicite beaucoup plus les quadriceps",
+                    "Travaillez la mobilité des poignets si nécessaire"
+                ],
+                muscles: { principaux: ["Quadriceps"], secondaires: ["Fessiers", "Core", "Haut du dos"] }
+            },
+            'Squat pause': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Full_Squat/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Full_Squat/1.jpg',
+                execution: [
+                    "Même position que le squat classique",
+                    "Descendez jusqu'en bas",
+                    "Marquez une pause de 2-3 secondes en bas",
+                    "Remontez explosif"
+                ],
+                vigilance: [
+                    "La pause élimine l'effet rebond - charge plus légère",
+                    "Restez gainé pendant la pause",
+                    "Ne relâchez pas la tension en bas",
+                    "Excellent pour travailler la force en bas du mouvement"
+                ],
+                muscles: { principaux: ["Quadriceps", "Fessiers"], secondaires: ["Ischio-jambiers", "Core"] }
+            },
+            'Goblet squat': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Goblet_Squat/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Goblet_Squat/1.jpg',
+                execution: [
+                    "Tenez un haltère ou kettlebell contre la poitrine",
+                    "Pieds plus larges que les épaules",
+                    "Descendez profond, coudes entre les genoux",
+                    "Poussez les genoux vers l'extérieur avec les coudes"
+                ],
+                vigilance: [
+                    "Excellent pour apprendre la technique du squat",
+                    "Gardez le poids contre la poitrine, pas devant",
+                    "Descendez aussi bas que votre mobilité le permet",
+                    "Les coudes aident à ouvrir les hanches"
+                ],
+                muscles: { principaux: ["Quadriceps", "Fessiers"], secondaires: ["Core", "Adducteurs"] }
+            },
+            'Squat bulgare': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Single_Leg_Split_Squat/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Single_Leg_Split_Squat/1.jpg',
+                execution: [
+                    "Pied arrière sur un banc, pied avant devant vous",
+                    "Descendez jusqu'à ce que le genou arrière frôle le sol",
+                    "Le genou avant ne dépasse pas trop la pointe du pied",
+                    "Poussez à travers le talon avant pour remonter"
+                ],
+                vigilance: [
+                    "Gardez le buste droit pendant tout le mouvement",
+                    "Le pied avant assez loin devant pour protéger le genou",
+                    "Concentrez l'effort sur la jambe avant",
+                    "Équilibrez les deux côtés en termes de répétitions"
+                ],
+                muscles: { principaux: ["Quadriceps", "Fessiers"], secondaires: ["Ischio-jambiers", "Adducteurs"] }
+            },
+            'Fentes': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Lunges_-_Walking/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Lunges_-_Walking/1.jpg',
+                execution: [
+                    "Debout, haltères le long du corps ou barre sur les épaules",
+                    "Faites un grand pas en avant",
+                    "Descendez jusqu'à ce que le genou arrière frôle le sol",
+                    "Poussez sur la jambe avant pour revenir"
+                ],
+                vigilance: [
+                    "Gardez le buste droit, ne vous penchez pas en avant",
+                    "Le genou avant reste au-dessus de la cheville",
+                    "Pas trop court = stress sur le genou",
+                    "Pas trop long = perte d'équilibre"
+                ],
+                muscles: { principaux: ["Quadriceps", "Fessiers"], secondaires: ["Ischio-jambiers", "Mollets"] }
+            },
+            'Fentes marchées': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Lunges_-_Walking/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Lunges_-_Walking/1.jpg',
+                execution: [
+                    "Faites une fente en avançant",
+                    "Poussez pour amener le pied arrière devant",
+                    "Enchaînez avec l'autre jambe en continuant d'avancer",
+                    "Gardez un rythme régulier"
+                ],
+                vigilance: [
+                    "Gardez le buste droit pendant la marche",
+                    "Contrôlez chaque pas, ne précipitez pas",
+                    "Regardez devant vous, pas au sol",
+                    "Prévoyez l'espace nécessaire"
+                ],
+                muscles: { principaux: ["Quadriceps", "Fessiers"], secondaires: ["Ischio-jambiers", "Core"] }
+            },
+            'Presse à cuisses / Hack squat': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hack_Squat/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hack_Squat/1.jpg',
+                execution: [
+                    "Installez-vous sur la machine, dos bien calé",
+                    "Pieds à largeur d'épaules sur la plateforme",
+                    "Descendez en contrôlant jusqu'à 90° ou plus",
+                    "Poussez pour remonter sans verrouiller les genoux"
+                ],
+                vigilance: [
+                    "Ne descendez pas trop bas si vous avez des douleurs lombaires",
+                    "Gardez le bas du dos plaqué contre le dossier",
+                    "Ne verrouillez jamais complètement les genoux",
+                    "Position des pieds haute = plus de fessiers, basse = plus de quadriceps"
+                ],
+                muscles: { principaux: ["Quadriceps"], secondaires: ["Fessiers", "Ischio-jambiers"] }
+            },
+            'Extension quadriceps': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leg_Extensions/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leg_Extensions/1.jpg',
+                execution: [
+                    "Assis sur la machine, chevilles sous le boudin",
+                    "Tendez les jambes jusqu'à l'extension complète",
+                    "Contractez les quadriceps en haut",
+                    "Redescendez de façon contrôlée"
+                ],
+                vigilance: [
+                    "Ne donnez pas d'élan avec le buste",
+                    "Contrôlez la descente, ne laissez pas tomber le poids",
+                    "Évitez cet exercice si vous avez des problèmes de genoux",
+                    "Mouvement d'isolation - pas de charges excessives"
+                ],
+                muscles: { principaux: ["Quadriceps"], secondaires: [] }
+            },
+
+            // ========== BAS DU CORPS - ISCHIO-JAMBIERS / FESSIERS ==========
+            'Soulevé de terre': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Deadlift/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Deadlift/1.jpg',
+                execution: [
+                    "Pieds largeur de hanches, barre au-dessus des lacets",
+                    "Penchez-vous et saisissez la barre, dos droit",
+                    "Poussez avec les jambes et levez le buste simultanément",
+                    "Terminez debout, hanches et genoux verrouillés, épaules en arrière"
+                ],
+                vigilance: [
+                    "Gardez le dos DROIT pendant tout le mouvement",
+                    "La barre reste proche du corps (frôle les tibias)",
+                    "Ne tirez pas avec le dos, poussez avec les jambes",
+                    "Regardez devant vous, pas en l'air"
+                ],
+                muscles: { principaux: ["Ischio-jambiers", "Fessiers", "Lombaires"], secondaires: ["Quadriceps", "Trapèzes", "Avant-bras"] }
+            },
+            'Soulevé conventionnel': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Deadlift/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Deadlift/1.jpg',
+                execution: [
+                    "Pieds largeur de hanches, pointes légèrement vers l'extérieur",
+                    "Mains juste à l'extérieur des genoux",
+                    "Dos droit, poitrine sortie, regard devant",
+                    "Soulevez en gardant la barre proche du corps"
+                ],
+                vigilance: [
+                    "Le dos reste neutre, jamais arrondi",
+                    "La barre monte verticalement le long des jambes",
+                    "Contractez les fessiers en haut du mouvement",
+                    "Reposez la barre de façon contrôlée"
+                ],
+                muscles: { principaux: ["Ischio-jambiers", "Fessiers", "Lombaires"], secondaires: ["Quadriceps", "Trapèzes"] }
+            },
+            'Soulevé sumo': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Sumo_Deadlift/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Sumo_Deadlift/1.jpg',
+                execution: [
+                    "Pieds très écartés, pointes vers l'extérieur (45°+)",
+                    "Mains à l'intérieur des genoux, prise étroite",
+                    "Poussez les genoux vers l'extérieur",
+                    "Soulevez en gardant le buste plus vertical"
+                ],
+                vigilance: [
+                    "Demande plus de mobilité de hanches",
+                    "Les genoux doivent suivre les pieds (vers l'extérieur)",
+                    "Le buste reste plus droit qu'en conventionnel",
+                    "Excellent pour ceux avec un buste long"
+                ],
+                muscles: { principaux: ["Quadriceps", "Fessiers", "Adducteurs"], secondaires: ["Ischio-jambiers", "Lombaires"] }
+            },
+            'Soulevé roumain': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Romanian_Deadlift/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Romanian_Deadlift/1.jpg',
+                execution: [
+                    "Debout, barre en mains, genoux très légèrement fléchis",
+                    "Penchez-vous en poussant les hanches vers l'arrière",
+                    "Descendez jusqu'à sentir l'étirement des ischio-jambiers",
+                    "Remontez en contractant les fessiers"
+                ],
+                vigilance: [
+                    "Gardez le dos DROIT, jamais arrondi",
+                    "Le mouvement vient des hanches, pas du dos",
+                    "Les genoux restent fixes (légèrement fléchis)",
+                    "Ne descendez pas plus bas que votre souplesse le permet"
+                ],
+                muscles: { principaux: ["Ischio-jambiers", "Fessiers"], secondaires: ["Lombaires"] }
+            },
+            'Good morning': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Good_Morning/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Good_Morning/1.jpg',
+                execution: [
+                    "Barre sur les trapèzes comme pour un squat",
+                    "Genoux légèrement fléchis, pieds largeur d'épaules",
+                    "Penchez-vous en poussant les hanches en arrière",
+                    "Descendez jusqu'à ce que le buste soit presque parallèle"
+                ],
+                vigilance: [
+                    "Gardez le dos parfaitement droit",
+                    "Commencez très léger pour maîtriser le mouvement",
+                    "Ne descendez pas si vous sentez le dos s'arrondir",
+                    "Exercice avancé - maîtrisez d'abord le RDL"
+                ],
+                muscles: { principaux: ["Ischio-jambiers", "Lombaires"], secondaires: ["Fessiers"] }
+            },
+            'Hip thrust': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/1.jpg',
+                execution: [
+                    "Dos contre un banc, barre sur les hanches (avec pad)",
+                    "Pieds à plat au sol, écartés largeur d'épaules",
+                    "Poussez les hanches vers le plafond",
+                    "Contractez les fessiers en haut, puis redescendez"
+                ],
+                vigilance: [
+                    "Gardez le menton rentré (regardez devant, pas le plafond)",
+                    "Ne cambrez pas excessivement le bas du dos",
+                    "Contractez fort les fessiers en haut",
+                    "Utilisez un pad pour protéger les hanches"
+                ],
+                muscles: { principaux: ["Fessiers"], secondaires: ["Ischio-jambiers", "Quadriceps"] }
+            },
+            'Pont fessier unilatéral': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/1.jpg',
+                execution: [
+                    "Allongé au sol, un pied au sol, l'autre jambe tendue ou pliée en l'air",
+                    "Poussez avec le pied au sol pour lever les hanches",
+                    "Contractez le fessier en haut",
+                    "Redescendez sans toucher le sol entre les répétitions"
+                ],
+                vigilance: [
+                    "Gardez les hanches parallèles au sol",
+                    "Ne laissez pas la hanche du côté libre s'affaisser",
+                    "Poussez à travers le talon",
+                    "Travaillez les deux côtés de manière égale"
+                ],
+                muscles: { principaux: ["Fessiers"], secondaires: ["Ischio-jambiers", "Core"] }
+            },
+            'Leg curl': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_Leg_Curls/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_Leg_Curls/1.jpg',
+                execution: [
+                    "Allongé face contre la machine, chevilles sous le boudin",
+                    "Fléchissez les jambes en amenant les talons vers les fessiers",
+                    "Contractez les ischio-jambiers en haut",
+                    "Redescendez de façon contrôlée"
+                ],
+                vigilance: [
+                    "Gardez les hanches plaquées contre le banc",
+                    "Ne donnez pas d'élan avec le bassin",
+                    "Contrôlez la phase négative",
+                    "Ne verrouillez pas les genoux en bas"
+                ],
+                muscles: { principaux: ["Ischio-jambiers"], secondaires: ["Mollets"] }
+            },
+            'Leg curl élastique': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_Leg_Curls/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_Leg_Curls/1.jpg',
+                execution: [
+                    "Allongé face au sol, élastique autour des chevilles et fixé devant",
+                    "Fléchissez les jambes contre la résistance",
+                    "Contractez les ischio-jambiers",
+                    "Revenez lentement"
+                ],
+                vigilance: [
+                    "Gardez les hanches au sol",
+                    "Tension constante de l'élastique",
+                    "Mouvement contrôlé",
+                    "Alternative pratique à la machine"
+                ],
+                muscles: { principaux: ["Ischio-jambiers"], secondaires: ["Mollets"] }
+            },
+            'Sumo squat': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Sumo_Squat/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Sumo_Squat/1.jpg',
+                execution: [
+                    "Pieds très écartés (1.5x largeur d'épaules), pointes à 45°",
+                    "Haltère tenu à deux mains entre les jambes",
+                    "Descendez en gardant le buste droit",
+                    "Poussez les genoux vers l'extérieur"
+                ],
+                vigilance: [
+                    "Les genoux suivent la direction des pieds",
+                    "Gardez le dos droit, ne vous penchez pas en avant",
+                    "Descendez aussi bas que votre mobilité le permet",
+                    "Excellent pour les adducteurs et l'intérieur des cuisses"
+                ],
+                muscles: { principaux: ["Quadriceps", "Adducteurs", "Fessiers"], secondaires: ["Ischio-jambiers"] }
+            },
+            'Sumo squat haltère': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Sumo_Squat/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Sumo_Squat/1.jpg',
+                execution: [
+                    "Position sumo, haltère tenu verticalement entre les jambes",
+                    "Descendez en poussant les genoux vers l'extérieur",
+                    "Gardez le buste droit",
+                    "Poussez à travers les talons pour remonter"
+                ],
+                vigilance: [
+                    "Ne laissez pas les genoux rentrer vers l'intérieur",
+                    "Gardez le poids centré",
+                    "Buste droit tout au long du mouvement",
+                    "Amplitude complète si la mobilité le permet"
+                ],
+                muscles: { principaux: ["Quadriceps", "Adducteurs", "Fessiers"], secondaires: ["Ischio-jambiers"] }
+            },
+            'Abducteurs': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Thigh_Abductor/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Thigh_Abductor/1.jpg',
+                execution: [
+                    "Assis sur la machine, jambes contre les boudins",
+                    "Écartez les jambes contre la résistance",
+                    "Contractez les muscles externes des cuisses",
+                    "Revenez de façon contrôlée"
+                ],
+                vigilance: [
+                    "Gardez le dos plaqué contre le dossier",
+                    "Mouvement contrôlé, pas d'élan",
+                    "Ne chargez pas excessivement",
+                    "Concentrez-vous sur la contraction musculaire"
+                ],
+                muscles: { principaux: ["Moyen fessier", "Tenseur du fascia lata"], secondaires: [] }
+            },
+
+            // ========== BAS DU CORPS - MOLLETS ==========
+            'Mollets debout': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Calf_Raises/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Calf_Raises/1.jpg',
+                execution: [
+                    "Debout sur une marche, talons dans le vide",
+                    "Descendez les talons pour étirer les mollets",
+                    "Montez sur la pointe des pieds le plus haut possible",
+                    "Contractez fort en haut"
+                ],
+                vigilance: [
+                    "Amplitude maximale (étirement + contraction)",
+                    "Gardez les jambes tendues (travaille le gastrocnémien)",
+                    "Mouvement lent et contrôlé",
+                    "Évitez de rebondir"
+                ],
+                muscles: { principaux: ["Gastrocnémiens (mollets)"], secondaires: ["Soléaire"] }
+            },
+            'Mollets assis': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Calf_Raise/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Calf_Raise/1.jpg',
+                execution: [
+                    "Assis, genoux sous le boudin, pieds sur la plateforme",
+                    "Descendez les talons pour étirer",
+                    "Montez sur la pointe des pieds",
+                    "Contractez en haut puis redescendez"
+                ],
+                vigilance: [
+                    "Genoux pliés = cible le soléaire",
+                    "Amplitude complète obligatoire",
+                    "Pas de rebond en bas",
+                    "Complémentaire aux mollets debout"
+                ],
+                muscles: { principaux: ["Soléaire"], secondaires: ["Gastrocnémiens"] }
+            },
+            'Mollets debout + assis': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Calf_Raises/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Calf_Raises/1.jpg',
+                execution: [
+                    "Alternez entre mollets debout et mollets assis (biset)",
+                    "Debout : jambes tendues, cible le gastrocnémien",
+                    "Assis : genoux pliés, cible le soléaire",
+                    "Enchaînez sans repos"
+                ],
+                vigilance: [
+                    "Amplitude complète sur les deux exercices",
+                    "Le biset crée une congestion intense",
+                    "Adaptez les charges pour le biset",
+                    "Les deux exercices sont complémentaires"
+                ],
+                muscles: { principaux: ["Gastrocnémiens", "Soléaire"], secondaires: [] }
+            },
+            'Mollets': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Calf_Raises/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Calf_Raises/1.jpg',
+                execution: [
+                    "Debout sur une marche ou au sol",
+                    "Montez sur la pointe des pieds le plus haut possible",
+                    "Contractez les mollets en haut",
+                    "Redescendez de façon contrôlée"
+                ],
+                vigilance: [
+                    "Amplitude complète pour un développement optimal",
+                    "Évitez les rebonds",
+                    "Maintenez la contraction en haut",
+                    "Variez debout/assis pour cibler tout le mollet"
+                ],
+                muscles: { principaux: ["Mollets"], secondaires: [] }
+            },
+
+            // ========== CROSSFIT / HALTÉROPHILIE ==========
+            'Snatch': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Snatch/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Snatch/1.jpg',
+                execution: [
+                    "Prise large, barre au sol, dos droit",
+                    "Premier tirage : soulevez jusqu'aux genoux",
+                    "Deuxième tirage : extension explosive des hanches",
+                    "Passez sous la barre et réceptionnez en squat overhead"
+                ],
+                vigilance: [
+                    "Mouvement technique - apprenez avec un coach",
+                    "Gardez la barre proche du corps",
+                    "L'extension des hanches doit être explosive",
+                    "Travaillez la mobilité des épaules avant de charger"
+                ],
+                muscles: { principaux: ["Corps entier"], secondaires: ["Quadriceps", "Fessiers", "Épaules", "Dos"] }
+            },
+            'Clean & Jerk': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Clean_and_Jerk/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Clean_and_Jerk/1.jpg',
+                execution: [
+                    "Clean : amenez la barre du sol aux épaules (position front rack)",
+                    "Jerk : fléchissez légèrement puis poussez la barre au-dessus de la tête",
+                    "Réceptionnez en split ou en squat",
+                    "Terminez debout, barre verrouillée au-dessus"
+                ],
+                vigilance: [
+                    "Deux mouvements distincts à maîtriser séparément",
+                    "Le clean demande une bonne mobilité de poignets",
+                    "Le jerk utilise l'élan des jambes, pas les bras",
+                    "Apprenez avec un coach qualifié"
+                ],
+                muscles: { principaux: ["Corps entier"], secondaires: ["Quadriceps", "Fessiers", "Épaules", "Triceps"] }
+            },
+            'Front Squat': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Barbell_Squat/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Barbell_Squat/1.jpg',
+                execution: [
+                    "Barre en position front rack (sur les deltoïdes)",
+                    "Coudes hauts, pieds largeur d'épaules",
+                    "Descendez en gardant le buste très vertical",
+                    "Remontez en gardant les coudes hauts"
+                ],
+                vigilance: [
+                    "Les coudes doivent rester hauts",
+                    "Travaillez la mobilité des poignets si nécessaire",
+                    "Le buste reste plus droit qu'au back squat",
+                    "Excellent transfert vers le clean"
+                ],
+                muscles: { principaux: ["Quadriceps"], secondaires: ["Core", "Haut du dos", "Fessiers"] }
+            },
+            'Overhead Squat': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Overhead_Squat/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Overhead_Squat/1.jpg',
+                execution: [
+                    "Barre au-dessus de la tête, prise snatch (large)",
+                    "Bras verrouillés, épaules actives",
+                    "Descendez en squat profond",
+                    "Gardez la barre au-dessus du milieu du pied"
+                ],
+                vigilance: [
+                    "Demande une excellente mobilité (épaules, hanches, chevilles)",
+                    "Commencez avec un bâton ou une barre vide",
+                    "Les bras restent verrouillés tout le long",
+                    "Exercice de mobilité autant que de force"
+                ],
+                muscles: { principaux: ["Quadriceps", "Core"], secondaires: ["Épaules", "Haut du dos", "Fessiers"] }
+            },
+            'Muscle-ups': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/1.jpg',
+                execution: [
+                    "Suspendez-vous à la barre ou aux anneaux",
+                    "Tirez-vous puissamment en amenant les hanches vers la barre",
+                    "Basculez au-dessus de la barre (transition)",
+                    "Poussez pour terminer bras tendus au-dessus"
+                ],
+                vigilance: [
+                    "Maîtrisez d'abord tractions et dips séparément",
+                    "La transition est la partie la plus technique",
+                    "Le kipping aide mais apprenez aussi le strict",
+                    "Progression : tractions hautes puis muscle-ups assistés"
+                ],
+                muscles: { principaux: ["Dorsaux", "Pectoraux", "Triceps"], secondaires: ["Biceps", "Core"] }
+            },
+            'HSPU': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Handstand_Push-Ups/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Handstand_Push-Ups/1.jpg',
+                execution: [
+                    "En appui contre un mur, tête en bas",
+                    "Mains légèrement plus larges que les épaules",
+                    "Descendez jusqu'à ce que la tête touche le sol",
+                    "Poussez pour revenir en position haute"
+                ],
+                vigilance: [
+                    "Commencez par des pike push-ups ou HSPU sur box",
+                    "Gardez le corps gainé contre le mur",
+                    "Ne vous laissez pas tomber sur la tête",
+                    "Progressez vers le HSPU strict puis kipping"
+                ],
+                muscles: { principaux: ["Deltoïdes", "Triceps"], secondaires: ["Trapèzes", "Core"] }
+            },
+            'Toes-to-bar': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hanging_Leg_Raise/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hanging_Leg_Raise/1.jpg',
+                execution: [
+                    "Suspendez-vous à la barre, bras tendus",
+                    "Levez les jambes tendues vers la barre",
+                    "Touchez la barre avec les orteils",
+                    "Redescendez de façon contrôlée"
+                ],
+                vigilance: [
+                    "Commencez par des relevés de genoux",
+                    "Utilisez le kipping pour plus de répétitions",
+                    "Version stricte = plus de travail abdominal",
+                    "Maintenez une prise solide sur la barre"
+                ],
+                muscles: { principaux: ["Abdominaux", "Fléchisseurs de hanches"], secondaires: ["Dorsaux", "Avant-bras"] }
+            },
+            'Pistol Squats': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pistol_Squat/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pistol_Squat/1.jpg',
+                execution: [
+                    "Debout sur une jambe, l'autre tendue devant",
+                    "Descendez en squat complet sur une jambe",
+                    "Gardez l'autre jambe tendue devant vous",
+                    "Remontez sans poser l'autre pied"
+                ],
+                vigilance: [
+                    "Demande force, équilibre et mobilité",
+                    "Commencez assisté (main sur un support)",
+                    "Gardez le talon au sol",
+                    "Le genou peut dépasser les orteils (c'est normal)"
+                ],
+                muscles: { principaux: ["Quadriceps", "Fessiers"], secondaires: ["Core", "Mollets"] }
+            },
+            'Thrusters': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Thrusters/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Thrusters/1.jpg',
+                execution: [
+                    "Barre en position front rack",
+                    "Descendez en front squat",
+                    "Remontez explosif et utilisez l'élan pour pousser la barre overhead",
+                    "Verrouillez bras tendus puis redescendez"
+                ],
+                vigilance: [
+                    "Le mouvement doit être fluide (squat → press)",
+                    "L'élan des jambes aide à pousser la barre",
+                    "Gardez les coudes hauts dans le squat",
+                    "Exercice très cardio - gérez votre respiration"
+                ],
+                muscles: { principaux: ["Quadriceps", "Deltoïdes"], secondaires: ["Fessiers", "Triceps", "Core"] }
+            },
+            'Burpees': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Burpee/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Burpee/1.jpg',
+                execution: [
+                    "Debout, descendez en squat mains au sol",
+                    "Jetez les pieds en arrière (position pompe)",
+                    "Faites une pompe (optionnel)",
+                    "Ramenez les pieds et sautez bras en l'air"
+                ],
+                vigilance: [
+                    "Gardez le core gainé en position pompe",
+                    "Atterrissez en douceur sur les sauts",
+                    "Adaptez la vitesse à votre niveau",
+                    "Respirez régulièrement malgré l'effort"
+                ],
+                muscles: { principaux: ["Corps entier"], secondaires: ["Cardio", "Pectoraux", "Quadriceps"] }
+            },
+            'WOD': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Burpee/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Burpee/1.jpg',
+                execution: [
+                    "WOD = Workout Of the Day (entraînement du jour)",
+                    "Suivez le format indiqué (AMRAP, For Time, EMOM...)",
+                    "Enchaînez les exercices selon le protocole",
+                    "Notez votre score (temps, rounds, reps)"
+                ],
+                vigilance: [
+                    "Échauffez-vous correctement avant",
+                    "Adaptez les charges et mouvements à votre niveau",
+                    "La technique prime sur la vitesse",
+                    "Hydratez-vous et récupérez après"
+                ],
+                muscles: { principaux: ["Corps entier"], secondaires: [] }
+            },
+
+            // ========== POIDS DE CORPS ==========
+            'Pompes': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pushups/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pushups/1.jpg',
+                execution: [
+                    "Mains au sol légèrement plus larges que les épaules",
+                    "Corps gainé, aligné de la tête aux talons",
+                    "Descendez en fléchissant les coudes jusqu'à frôler le sol",
+                    "Poussez pour revenir bras tendus"
+                ],
+                vigilance: [
+                    "Gardez le corps parfaitement gainé (pas de dos creux)",
+                    "Coudes à 45° du corps, pas écartés à 90°",
+                    "Descendez la poitrine, pas le menton",
+                    "Extension complète des bras en haut"
+                ],
+                muscles: { principaux: ["Pectoraux", "Triceps"], secondaires: ["Deltoïdes antérieurs", "Core"] }
+            },
+            'Pompes déclinées': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Push-Up/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Push-Up/1.jpg',
+                execution: [
+                    "Pieds surélevés sur un banc ou une chaise",
+                    "Mains au sol, corps gainé",
+                    "Descendez jusqu'à ce que la poitrine frôle le sol",
+                    "Poussez pour remonter"
+                ],
+                vigilance: [
+                    "Plus les pieds sont hauts, plus c'est difficile",
+                    "Cible davantage le haut des pectoraux",
+                    "Gardez le corps aligné (pas de dos creux)",
+                    "Progression : augmentez la hauteur des pieds"
+                ],
+                muscles: { principaux: ["Pectoraux supérieurs", "Triceps"], secondaires: ["Deltoïdes", "Core"] }
+            },
+            'Pike push-ups': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pike_Push_Press/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pike_Push_Press/1.jpg',
+                execution: [
+                    "Position de V inversé (hanches hautes)",
+                    "Mains au sol, pieds au sol, fesses vers le plafond",
+                    "Descendez la tête vers le sol entre les mains",
+                    "Poussez pour remonter"
+                ],
+                vigilance: [
+                    "Plus les pieds sont proches des mains, plus c'est difficile",
+                    "Excellent pour progresser vers le HSPU",
+                    "Gardez les jambes tendues si possible",
+                    "La tête descend devant les mains"
+                ],
+                muscles: { principaux: ["Deltoïdes", "Triceps"], secondaires: ["Pectoraux supérieurs"] }
+            },
+            'Dips sur chaise': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bench_Dips/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bench_Dips/1.jpg',
+                execution: [
+                    "Mains sur le bord d'une chaise derrière vous",
+                    "Jambes tendues devant ou pieds au sol (plus facile)",
+                    "Descendez en fléchissant les coudes",
+                    "Poussez pour remonter bras tendus"
+                ],
+                vigilance: [
+                    "Ne descendez pas trop bas (stress sur les épaules)",
+                    "Gardez les coudes vers l'arrière, pas écartés",
+                    "La chaise doit être stable",
+                    "Progression : jambes tendues puis surélevées"
+                ],
+                muscles: { principaux: ["Triceps"], secondaires: ["Pectoraux", "Deltoïdes antérieurs"] }
+            },
+            'Tractions porte': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/1.jpg',
+                execution: [
+                    "Utilisez une barre de traction de porte",
+                    "Suspendez-vous, prise pronation ou supination",
+                    "Tirez-vous jusqu'à ce que le menton dépasse la barre",
+                    "Redescendez de façon contrôlée"
+                ],
+                vigilance: [
+                    "Vérifiez la solidité de l'installation",
+                    "Commencez par des tractions négatives si nécessaire",
+                    "Gardez le corps gainé",
+                    "Alternative : tractions australiennes sous une table"
+                ],
+                muscles: { principaux: ["Dorsaux"], secondaires: ["Biceps", "Avant-bras"] }
+            },
+            'Rowing inversé (table)': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Inverted_Row/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Inverted_Row/1.jpg',
+                execution: [
+                    "Allongez-vous sous une table solide",
+                    "Saisissez le bord de la table, corps aligné",
+                    "Tirez-vous vers la table en serrant les omoplates",
+                    "Redescendez de façon contrôlée"
+                ],
+                vigilance: [
+                    "La table doit être suffisamment lourde et stable",
+                    "Gardez le corps gainé et droit",
+                    "Plus vous êtes horizontal, plus c'est difficile",
+                    "Excellent pour progresser vers les tractions"
+                ],
+                muscles: { principaux: ["Dorsaux", "Trapèzes"], secondaires: ["Biceps", "Core"] }
+            },
+            'Squats sautés': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Freehand_Jump_Squat/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Freehand_Jump_Squat/1.jpg',
+                execution: [
+                    "Position de squat classique",
+                    "Descendez en squat",
+                    "Explosez vers le haut en sautant",
+                    "Atterrissez en douceur et enchaînez"
+                ],
+                vigilance: [
+                    "Atterrissez sur l'avant du pied, genoux fléchis",
+                    "Gardez les genoux alignés avec les pieds",
+                    "Exercice intense pour les articulations",
+                    "Progressez d'abord sur les squats classiques"
+                ],
+                muscles: { principaux: ["Quadriceps", "Fessiers"], secondaires: ["Mollets", "Core"] }
+            },
+            'Fentes alternées': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Lunges_-_Walking/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Lunges_-_Walking/1.jpg',
+                execution: [
+                    "Debout, faites un pas en avant",
+                    "Descendez jusqu'à ce que le genou arrière frôle le sol",
+                    "Revenez en position debout",
+                    "Alternez avec l'autre jambe"
+                ],
+                vigilance: [
+                    "Gardez le buste droit",
+                    "Le genou avant ne dépasse pas les orteils",
+                    "Poussez à travers le talon avant",
+                    "Équilibrez les répétitions des deux côtés"
+                ],
+                muscles: { principaux: ["Quadriceps", "Fessiers"], secondaires: ["Ischio-jambiers"] }
+            },
+            'Pont fessier': {
+                image: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Glute_Bridge/0.jpg',
+                image2: 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Glute_Bridge/1.jpg',
+                execution: [
+                    "Allongé sur le dos, genoux pliés, pieds au sol",
+                    "Poussez les hanches vers le plafond",
+                    "Contractez fort les fessiers en haut",
+                    "Redescendez sans toucher le sol"
+                ],
+                vigilance: [
+                    "Ne cambrez pas excessivement le dos",
+                    "La force vient des fessiers, pas du dos",
+                    "Gardez les abdos engagés",
+                    "Progression : unilatéral puis lesté"
+                ],
+                muscles: { principaux: ["Fessiers"], secondaires: ["Ischio-jambiers", "Core"] }
+            }
+        };
+
         // ==================== STATE ====================
         let appState = {
             settings: {
@@ -2529,6 +4094,7 @@
 
                     appState.inBiset = true;
                     renderSeriesProgress(exercise.sets, appState.currentSeriesIndex);
+                    displayExerciseDetails(bisetName);
                     showPage('exercisePage');
                     return;
                 }
@@ -2564,6 +4130,7 @@
             document.getElementById('bodyweightIndicator').style.display = isBodyweight ? 'block' : 'none';
 
             renderSeriesProgress(exercise.sets, appState.currentSeriesIndex);
+            displayExerciseDetails(exercise.displayName || exercise.name);
             showPage('exercisePage');
         }
 
@@ -2576,6 +4143,104 @@
                 html += `<div class="${className}"></div>`;
             }
             document.getElementById('seriesProgress').innerHTML = html;
+        }
+
+        function toggleExerciseDetails() {
+            const toggle = document.getElementById('detailsToggle');
+            const content = document.getElementById('detailsContent');
+            toggle.classList.toggle('open');
+            content.classList.toggle('open');
+
+            if (content.classList.contains('open')) {
+                toggle.querySelector('span:first-child').textContent = 'Masquer les instructions';
+            } else {
+                toggle.querySelector('span:first-child').textContent = 'Voir les instructions';
+            }
+        }
+
+        function displayExerciseDetails(exerciseName) {
+            const panel = document.getElementById('exerciseDetailsPanel');
+            const img1 = document.getElementById('exerciseImg1');
+            const img2 = document.getElementById('exerciseImg2');
+            const executionList = document.getElementById('executionList');
+            const vigilanceList = document.getElementById('vigilanceList');
+            const musclesTags = document.getElementById('musclesTags');
+            const detailsContent = document.getElementById('detailsContent');
+            const detailsToggle = document.getElementById('detailsToggle');
+
+            // Chercher les détails de l'exercice (essayer plusieurs variantes du nom)
+            let details = EXERCISE_DETAILS[exerciseName];
+
+            // Si pas trouvé, essayer sans les préfixes/suffixes courants
+            if (!details) {
+                const baseName = exerciseName
+                    .replace(' lestées', '')
+                    .replace(' lestés', '')
+                    .replace(' lourd', '')
+                    .replace(' haltère', '')
+                    .replace(' barre', '')
+                    .replace(' élastique', '');
+                details = EXERCISE_DETAILS[baseName];
+            }
+
+            // Si toujours pas trouvé, chercher une correspondance partielle
+            if (!details) {
+                const keys = Object.keys(EXERCISE_DETAILS);
+                const matchingKey = keys.find(key =>
+                    exerciseName.toLowerCase().includes(key.toLowerCase()) ||
+                    key.toLowerCase().includes(exerciseName.toLowerCase())
+                );
+                if (matchingKey) {
+                    details = EXERCISE_DETAILS[matchingKey];
+                }
+            }
+
+            if (!details) {
+                panel.style.display = 'none';
+                return;
+            }
+
+            // Afficher le panneau
+            panel.style.display = 'block';
+
+            // Charger les images
+            img1.src = details.image;
+            img2.src = details.image2;
+
+            // Gérer les erreurs de chargement d'image
+            img1.onerror = () => { img1.style.display = 'none'; };
+            img2.onerror = () => { img2.style.display = 'none'; };
+            img1.onload = () => { img1.style.display = 'block'; };
+            img2.onload = () => { img2.style.display = 'block'; };
+
+            // Remplir la liste d'exécution
+            executionList.innerHTML = details.execution
+                .map(step => `<li>${step}</li>`)
+                .join('');
+
+            // Remplir les points de vigilance
+            vigilanceList.innerHTML = details.vigilance
+                .map(point => `<li>${point}</li>`)
+                .join('');
+
+            // Remplir les muscles
+            let musclesHtml = '';
+            if (details.muscles.principaux) {
+                musclesHtml += details.muscles.principaux
+                    .map(m => `<span class="muscle-tag primary">${m}</span>`)
+                    .join('');
+            }
+            if (details.muscles.secondaires && details.muscles.secondaires.length > 0) {
+                musclesHtml += details.muscles.secondaires
+                    .map(m => `<span class="muscle-tag secondary">${m}</span>`)
+                    .join('');
+            }
+            musclesTags.innerHTML = musclesHtml;
+
+            // Réinitialiser l'état du toggle (fermé par défaut)
+            detailsContent.classList.remove('open');
+            detailsToggle.classList.remove('open');
+            detailsToggle.querySelector('span:first-child').textContent = 'Voir les instructions';
         }
 
         function adjustWeight(delta) {
@@ -2624,6 +4289,7 @@
                     document.getElementById('bodyweightIndicator').style.display = isBodyweight ? 'block' : 'none';
 
                     renderSeriesProgress(exercise.sets, appState.currentSeriesIndex);
+                    displayExerciseDetails(exercise.displayName || exercise.name);
                     startRestTimer();
                 }
                 return;
@@ -2649,6 +4315,7 @@
                 document.getElementById('weightContainer').style.display = isBisetBodyweight ? 'none' : 'flex';
                 document.getElementById('bodyweightIndicator').style.display = isBisetBodyweight ? 'block' : 'none';
 
+                displayExerciseDetails(bisetName);
                 appState.inBiset = true;
                 return;
             }
